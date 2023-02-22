@@ -5,6 +5,7 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from message_queue_system import MessageQueueSystem
+import time
 
 IS_PERSISTENT = True
 mqs = MessageQueueSystem(persistent=IS_PERSISTENT)
@@ -207,6 +208,23 @@ def getSize():
             "message": str(e),
         }
         return jsonify(resp), 400
+    
+@app.route('/test', methods=['GET'])
+def test():
+    """
+    Test multithreading
+    """
+    req = request.json
+    if req is None:
+        resp = {
+            "status": "failure",
+            "message": "Required fields absent in request",
+        }
+        return jsonify(resp), 400
+    time_to_sleep = req['time']
+    time.sleep(time_to_sleep)
+    return "Completed", 400
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
